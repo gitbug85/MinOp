@@ -8,6 +8,7 @@ class Segment {
     field $ln :param;
 
     method val { return $val; }
+    method set_val ($new_val) { $val = $new_val; }
     method col { return $col; }
     method ln  { return $ln;  }
 
@@ -23,7 +24,8 @@ class Segment {
 use constant {
     JOINING_STRING => 0,
     JOINING_PATH => 1,
-    NOT_JOINING => 2,
+    JOINING_REGEX => 2,
+    NOT_JOINING => 3,
 };
 
 sub print_segments {
@@ -97,7 +99,7 @@ sub lex {
 =cut
 
     my $lexing_status = NOT_JOINING;
-    my @lexemes = [];
+    my @lexemes;
     my $current_lexeme;
     my $previous_backslash = 0;
 
@@ -105,23 +107,21 @@ sub lex {
         my $fragment = $fragments[$i];
         my $string = $fragment->val;
 
-        if ($string == "\"") {
-            $current_lexeme = Segment->new(col => $fragment->col, ln => $fragment->ln, val => $string);
+        if ($string eq "\\") {
+            # Backslash
 
-            if ($lexing_status == NOT_JOINING) {
-                $lexing_status = JOINING_STRING;
-            } elsif ($lexing_status == JOINING_STRING) {
-                if (previous_backslash == 0) {
-                    push @lexemes, Segment->new(col => $current_lexeme->col, ln => $current_lexeme->ln, val => $current_lexeme->val);
-                    $current_lexeme = "";
-                    $lexing_status = NOT_JOINING;
-                } else {
-                    $current_lexeme->val .= $string;
-                    $previous_backslash = 0;
-                }
-            }
-        } elsif ($string == "\\") {
-            $previous_backslash = 1;
+        } elsif ($string eq '"') {
+            # String start or end
+
+        } elsif ($string eq "'") {
+            # Path start or end
+
+        } elsif ($string eq "`") {
+            # Regex start or end
+
+        } else {
+            # Normal fragment
+
         }
     }
 
