@@ -1,3 +1,8 @@
 use io
+use string
+use cli
 
-say "\nHello world!\n"
+name = rs_arg(1)
+mut greeting = rs_str_concat(rs_str_concat("\nHello ", name), "\n")
+
+say greeting

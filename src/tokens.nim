@@ -76,6 +76,7 @@ proc tokenize*(json: string): seq[Token] =
         elif isQuotedString(lexeme):
           result.add(Token(kind: "STRING", value: lexeme))
         else:
-          result.add(Token(kind: "IDENT", value: lexeme))
+          if not (lexeme == " "):
+            result.add(Token(kind: "IDENT", value: lexeme))
 
   result.add(Token(kind: "EOF", value: ""))

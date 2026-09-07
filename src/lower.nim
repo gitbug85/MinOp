@@ -18,24 +18,53 @@ proc emit_whitespace(tp: var Transpiler, tokens: var seq[Token]): int =
       count += 1
       tokens.delete(0)
     elif cur.kind == "TAB":
-      tp.content.add(cur.value)
+      tp.content.add("  ")
       tokens.delete(0)
     else:
       newlines_removed = true
   return count
 
+proc expect_value(tp: var Transpiler, tokens: var seq[Token])
+
+proc emit_arguments(tp: var Transpiler, tokens: var seq[Token]) =
+  var cur = tokens[0]
+  if cur.kind == "LEFT_PAREN":
+    tp.content.add(cur.value)
+    tokens.delete(0)
+  else:
+    return
+
+  var parsing = true
+  while parsing:
+    echo "Test" & tokens[0].kind
+    expect_value(tp, tokens)
+    var cur = tokens[0]
+
+    if cur.kind == "RIGHT_PAREN":
+      tp.content.add(cur.value)
+      tokens.delete(0)
+      break
+    elif cur.kind != "COMMA":
+      quit("Error: Expected comma after value")
+    else:
+      # Must be comma
+      tp.content.add(cur.value)
+      tokens.delete(0)
+
 proc expect_value(tp: var Transpiler, tokens: var seq[Token]) =
   var cur = tokens[0]
   if cur.kind == "NUMBER":
     tp.content.add(fmt"{cur.value}")
+    tokens.delete(0)
   elif cur.kind == "STRING":
     tp.content.add(&"cstring({cur.value})")
+    tokens.delete(0)
   elif cur.kind == "IDENT":
     tp.content.add(cur.value)
+    tokens.delete(0)
+    emit_arguments(tp, tokens)
   else:
     quit(fmt"Error: Expected value found {cur.kind}")
-
-  tokens.delete(0)
 
 proc expect_equal(tp: var Transpiler, tokens: var seq[Token]) =
   var cur = tokens[0]
@@ -80,14 +109,12 @@ proc expect_statement(tp: var Transpiler, tokens: var seq[Token]) =
     tp.content.add("if ")
     tokens.delete(0)
     cur = tokens[0]
-    if cur.kind == "IDENT":
-      tp.content.add(cur.value)
-      tokens.delete(0)
-      cur = tokens[0]
-      # if cur.kind != "COLON":
-      #   quit("Error: Expected colon at end of if statement")
-    else:
-      quit("Error: Expected identifier after if")
+    expect_value(tp, tokens)
+    cur = tokens[0]
+    if cur.kind != "COLON":
+      quit("Error: Expected colon at end of if statement")
+    tp.content.add(":")
+    tokens.delete(0)
   elif cur.kind == "USE":
       tokens.delete(0)
       cur = tokens[0]
@@ -141,7 +168,7 @@ proc nim_say(s: cstring): void {.cdecl, importc.}
     tp.content.add(&"import {cur.value}")
     tokens.delete(0)
   else:
-    quit(fmt"Error: Expected identifer found {cur.kind}")
+    quit(fmt"Error: Expected identifier found {cur.kind}")
 
 proc transpile(tp: var Transpiler, tokens: var seq[Token]): string =
   var found_end_of_file = false

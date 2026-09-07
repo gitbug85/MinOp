@@ -6,7 +6,7 @@ You now should be able to compile .bn files.
 
 Example:
 ```
-# Use standard libraries
+# Importing standard libraries
 use math
 use cli
 use string
@@ -21,10 +21,10 @@ operator = rs_arg(2)
 right_operand = rs_str_to_i32(rs_arg(3))
 
 # Calculate and print
-if rs_str_eq(operator,"+"):
-    say rs_i32_to_str(rs_add(left_operand,right_operand))
-if rs_str_eq(operator,"-"):
-    say rs_i32_to_str(rs_sub(left_operand,right_operand))
-if rs_str_eq(operator,"x"):
-    say rs_i32_to_str(nim_mult(left_operand,right_operand))
+if rs_str_eq(operator, "+"):
+    say rs_i32_to_str(rs_add(left_operand, right_operand))
+if rs_str_eq(operator, "-"):
+    say rs_i32_to_str(rs_sub(left_operand, right_operand))
+if rs_str_eq(operator, "x"):
+    say rs_i32_to_str(nim_mult(left_operand, right_operand))
 ```
