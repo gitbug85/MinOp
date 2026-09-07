@@ -34,6 +34,22 @@ sub print_segments {
         $seg = $segs[$i];
         print "\"" . $seg->val . "\" ";
     }
+    print "\n"
+}
+
+sub push_seg_copy {
+    my ($array, $seg) = @_;
+
+    push @$array, Segment->new(
+        val => $seg->val,
+        ln  => $seg->ln,
+        col => $seg->col,
+    );
+}
+
+sub append_to_seg {
+    my ($seg, $other) = @_;
+    $seg->set_val($seg->val . $other->val);
 }
 
 sub lex {
@@ -90,6 +106,8 @@ sub lex {
 
     @fragments = @new_fragments;
 
+    print_segments(@fragments);
+
 =pod
     Join fragments together to make lexemes:
      - Strings ""
@@ -100,39 +118,93 @@ sub lex {
 
     my $lexing_status = NOT_JOINING;
     my @lexemes;
-    my $current_lexeme;
+    my $current_lexeme = Segment->new(col => 0, ln => 0, val => "");
     my $previous_backslash = 0;
 
     for my $i (0 .. $#fragments) {
         my $fragment = $fragments[$i];
-        my $string = $fragment->val;
+        my $string   = $fragment->val;
 
         if ($string eq "\\") {
             # Backslash
-
-        } elsif ($string eq '"') {
-            # String start or end
-
-        } elsif ($string eq "'") {
-            # Path start or end
-
-        } elsif ($string eq "`") {
-            # Regex start or end
-
-        } else {
-            # Normal fragment
-
+            $previous_backslash = 1;
+            append_to_seg($current_lexeme, $fragment);
+        }
+        elsif ($string eq '"') {
+            if ($lexing_status == JOINING_STRING) {
+                if ($previous_backslash) {
+                    # Escaped quote
+                    append_to_seg($current_lexeme, $fragment);
+                    $previous_backslash = 0;
+                }
+                else {
+                    # Closing quote
+                    $lexing_status = NOT_JOINING;
+                    append_to_seg($current_lexeme, $fragment);
+                    push @lexemes, $current_lexeme;
+                    $current_lexeme = Segment->new(col => 0, ln => 0, val => "");
+                }
+            }
+            else {
+                # Opening quote
+                $lexing_status = JOINING_STRING;
+                append_to_seg($current_lexeme, $fragment);
+            }
+        }
+        elsif ($string eq "'") {
+            if ($lexing_status == JOINING_PATH) {
+                # Closing quote
+                $lexing_status = NOT_JOINING;
+                append_to_seg($current_lexeme, $fragment);
+                push @lexemes, $current_lexeme;
+                $current_lexeme = Segment->new(col => 0, ln => 0, val => "");
+            }
+            else {
+                # Opening quote
+                $lexing_status = JOINING_PATH;
+                append_to_seg($current_lexeme, $fragment);
+            }
+        }
+        elsif ($string eq "`") {
+            if ($lexing_status == JOINING_REGEX) {
+                if ($previous_backslash) {
+                    # Escaped backtick
+                    append_to_seg($current_lexeme, $fragment);
+                    $previous_backslash = 0;
+                }
+                else {
+                    # Closing backtick
+                    $lexing_status = NOT_JOINING;
+                    append_to_seg($current_lexeme, $fragment);
+                    push @lexemes, $current_lexeme;
+                    $current_lexeme = Segment->new(col => 0, ln => 0, val => "");
+                }
+            }
+            else {
+                # Opening backtick
+                $lexing_status = JOINING_REGEX;
+                append_to_seg($current_lexeme, $fragment);
+            }
+        }
+        else {
+            if ($lexing_status == JOINING_STRING
+            || $lexing_status == JOINING_PATH
+            || $lexing_status == JOINING_REGEX)
+            {
+                append_to_seg($current_lexeme, $fragment);
+                $previous_backslash = 0;
+            }
+            else {
+                push_seg_copy(\@lexemes, $fragment);
+            }
         }
     }
 
-    print_segments(@lexemes);
+    # Convert and return JSON string
+    my $json_encoder = JSON::PP->new->convert_blessed(1);
+    my $json_string  = $json_encoder->encode(\@lexemes);
 
-    # # Convert and return JSON string
-    # my $json_encoder = JSON::PP->new->convert_blessed(1);
-    # my $json_string  = $json_encoder->encode(\@lexemes);
-
-    # print $json_string, "\n";
-    print '';
+    print $json_string, "\n";
 }
 
 my $input_file = $ARGV[0]; 
