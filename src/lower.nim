@@ -30,7 +30,7 @@ proc expect_value(tp: var Transpiler, tokens: var seq[Token]) =
     tp.content.add(fmt"{cur.value}")
   elif cur.kind == "STRING":
     tp.content.add(&"cstring({cur.value})")
-  elif cur.kind == "IDENTIFIER":
+  elif cur.kind == "IDENT":
     tp.content.add(cur.value)
   else:
     quit(fmt"Error: Expected value found {cur.kind}")
@@ -47,8 +47,8 @@ proc expect_equal(tp: var Transpiler, tokens: var seq[Token]) =
 
 proc expect_assignment(tp: var Transpiler, tokens: var seq[Token], mutable: bool) =
   var cur = tokens[0]
-  if cur.kind != "IDENTIFIER":
-    quit(fmt"Error: Expected IDENTIFIER found {cur.kind}")
+  if cur.kind != "IDENT":
+    quit(fmt"Error: Expected IDENT found {cur.kind}")
   if tp.scope.hasKey(cur.value):
     if tp.scope[cur.value] == false:
       quit(fmt"Error: Cannot change immutable variable {cur.value}")
@@ -67,7 +67,7 @@ proc expect_assignment(tp: var Transpiler, tokens: var seq[Token], mutable: bool
 
 proc expect_statement(tp: var Transpiler, tokens: var seq[Token]) =
   var cur = tokens[0]
-  if cur.kind == "IDENTIFIER":
+  if cur.kind == "IDENT":
     expect_assignment(tp, tokens, false)
   elif cur.kind == "MUTABLE":
     tokens.delete(0)
@@ -80,7 +80,7 @@ proc expect_statement(tp: var Transpiler, tokens: var seq[Token]) =
     tp.content.add("if ")
     tokens.delete(0)
     cur = tokens[0]
-    if cur.kind == "IDENTIFIER":
+    if cur.kind == "IDENT":
       tp.content.add(cur.value)
       tokens.delete(0)
       cur = tokens[0]
@@ -135,7 +135,7 @@ proc nim_echo(s: cstring): void {.cdecl, importc.}
 proc nim_say(s: cstring): void {.cdecl, importc.}
 """)
       tokens.delete(0)
-  elif cur.kind == "IMPORT":
+  elif cur.kind == "IMP":
     tokens.delete(0)
     cur = tokens[0]
     tp.content.add(&"import {cur.value}")

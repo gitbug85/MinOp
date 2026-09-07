@@ -1,5 +1,5 @@
 import std/strutils
-import re
+import std/json
 
 type
   Token* = object
@@ -16,42 +16,34 @@ proc isNumber(s: string): bool =
   except ValueError:
     return false
 
-proc removeAfter(s: string, sub: char): string =
-  let idx = s.find(sub)
-  if idx == 0:
-    return ""
-  elif idx > 0:
-    return s[0 .. idx-1]
-  return s
+proc tokenize*(json: string): seq[Token] =
 
-proc countLeadingSpaces(s: string): int =
-  while result < s.len and s[result] == ' ':
-    inc result
+  let data = parseJson(json)
 
-proc tokenize*(path: string): seq[Token] =
-  let content = readFile(path)
-  var allLines: seq[string] = content.splitLines()
-  let separators = {' '}
+  var lexemes: seq[string] = @[]
 
-  for line in allLines.mitems:
-    line = removeAfter(line, '#')
-    var leadingSpacesCount = countLeadingSpaces(line)
-    var tabs = leadingSpacesCount div 4
-    var leftover = leadingSpacesCount mod 4
-    if leftover != 0:
-      quit("Error: Invalid indentation")
-    for _ in 0..(tabs-1):
-      result.add(Token(kind: "TAB", value: "    "))
-    var lexemes = line.findAll(re""""(?:\\.|[^"\\])*"|\S+""")
-    echo lexemes
+  for item in data:
+    lexemes.add(item["val"].getStr())
 
-    for lexeme in lexemes:
+  for lexeme in lexemes:
       if lexeme.len == 0:
           continue
 
       case lexeme
       of "=":
         result.add(Token(kind: "EQUAL", value: lexeme))
+      of "+":
+        result.add(Token(kind: "PLUS", value: lexeme))
+      of "-":
+        result.add(Token(kind: "MINUS", value: lexeme))
+      of "*":
+        result.add(Token(kind: "MULTIPLY", value: lexeme))
+      of "/":
+        result.add(Token(kind: "DIVIDE", value: lexeme))
+      of "%":
+        result.add(Token(kind: "MODULO", value: lexeme))
+      of "^":
+        result.add(Token(kind: "EXPONENT", value: lexeme))
       of "say":
         result.add(Token(kind: "SAY", value: lexeme))
       of "mut":
@@ -59,7 +51,7 @@ proc tokenize*(path: string): seq[Token] =
       of "use":
         result.add(Token(kind: "USE", value: lexeme))
       of "imp":
-        result.add(Token(kind: "IMPORT", value: lexeme))
+        result.add(Token(kind: "IMP", value: lexeme))
       of "if":
         result.add(Token(kind: "IF", value: lexeme))
       of "elif":
@@ -68,13 +60,22 @@ proc tokenize*(path: string): seq[Token] =
         result.add(Token(kind: "ELSE", value: lexeme))
       of ":":
         result.add(Token(kind: "COLON", value: lexeme))
+      of "\n":
+        result.add(Token(kind: "NEWLINE", value: lexeme))
+      of "\t":
+        result.add(Token(kind: "TAB", value: lexeme))
+      of ",":
+        result.add(Token(kind: "COMMA", value: lexeme))
+      of "(":
+        result.add(Token(kind: "LEFT_PAREN", value: lexeme))
+      of ")":
+        result.add(Token(kind: "RIGHT_PAREN", value: lexeme))
       else:
         if isNumber(lexeme):
           result.add(Token(kind: "NUMBER", value: lexeme))
         elif isQuotedString(lexeme):
           result.add(Token(kind: "STRING", value: lexeme))
         else:
-          result.add(Token(kind: "IDENTIFIER", value: lexeme))
-    result.add(Token(kind: "NEWLINE", value: "\n"))
+          result.add(Token(kind: "IDENT", value: lexeme))
 
   result.add(Token(kind: "EOF", value: ""))

@@ -61,27 +61,39 @@ sub lex {
 
     my $current_fragment = "";
 
-    # Make fragments based on spaces
+    # Make fragments based lines
     while (my $line = <$fh>) {
         chomp $line;
-        print "Processing: $line\n";
 
-        my @chars = split('', $line);
-        my $space = " ";
+        $line =~ s/#.*$//;
 
-        for my $i (0 .. $#chars) {
-            if ($chars[$i] eq $space) {
-                if (current_fragment ne "") {
-                    push @fragments, Segment->new(col => $i, ln => $., val => $current_fragment);
-                    $current_fragment = "";
-                }
-                push @fragments, Segment->new(col => $i, ln => $., val => $space);
-            } else {
-                $current_fragment .= $chars[$i];
-            }
+        my $count = 0;
+        $line =~ s/^([ ]*)/$count = length($1); ""/e;
+        my $tabs = int($count / 4);
+        my $leftover = $count % 4;
+        if ($leftover != 0) {
+            return ""
         }
-        push @fragments, Segment->new(col => $i, ln => $., val => $current_fragment);
-        $current_fragment = "";
+
+        for my $i (0 .. $tabs-1) {
+            push @fragments, Segment->new(
+                val => "\t",
+                ln  => 0, 
+                col => 0
+            );
+        }
+
+        push @fragments, Segment->new(
+            val => $line, 
+            ln  => 0, 
+            col => 0
+        );
+
+        push @fragments, Segment->new(
+            val => "\n", 
+            ln  => 0, 
+            col => 0
+        );
     }
 
     our @new_fragments;
@@ -92,7 +104,7 @@ sub lex {
         my $string = $fragment->val;
         my $ln = $fragment->ln;
         my $col = $fragment->col;
-        my $regex = qr/([=\+\-\*\/"\(\)\\,#])/;
+        my $regex = qr/([=\+\-\*\/"\(\)\\,# ])/;
         my @strings = split($regex, $string);
         @strings = grep { length($_) > 0 } @strings;
         for my $str (@strings) {
@@ -105,8 +117,6 @@ sub lex {
     }
 
     @fragments = @new_fragments;
-
-    print_segments(@fragments);
 
 =pod
     Join fragments together to make lexemes:

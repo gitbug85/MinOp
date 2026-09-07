@@ -43,17 +43,9 @@ if command == "c":
 
   let perlScript = getAppDir() / "lexer.pl"
   let (pl_output, exitCode) = execCmdEx("perl " & quoteShell(perlScript) & " " & quoteShell(path))
-
-  # 4. Check the results
-  if exitCode == 0:
-    echo "Success! Perl Output:"
-    echo pl_output
-  else:
-    echo "Error running Perl script. Exit code: ", exitCode
-    echo pl_output
-
-
-  var tokens: seq[Token] = tokenize(path)
+  if exitCode != 0:
+    quit "Error running Perl script. Exit code: " & $exitCode
+  var tokens: seq[Token] = tokenize(pl_output)
   for tok in tokens:
     echo tok.kind
   var content = lower(tokens, "nim")
