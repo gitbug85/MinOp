@@ -1,7 +1,7 @@
 nimcache/
 nimblecache/
 htmldocs/
-src/bn
+src/minop
 examples/greeting
 examples/ascii_art_expressions
 examples/bn_calc

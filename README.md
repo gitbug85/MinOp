@@ -1,8 +1,8 @@
-# Borrow Nim
+# MinOp
 
-Nim and Rust inspired language.\
-Download the latest release. Put the folder where you want it. Then run ```install.sh```.
-You now should be able to compile .bn files.
+Language I'm making the goal of simplifying operators.
+Download the latest release. Put the folder where you want it. Then run ```install.sh```.\
+You now should be able to compile .minop files with the command ```minop c ./file.minop```
 
 Example:
 ```

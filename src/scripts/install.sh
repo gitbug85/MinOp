@@ -1,5 +1,5 @@
-if ! command -v bn >/dev/null 2>&1; then
-    BN_DIR="$(cd "$(dirname "../bn")" && pwd)"
-    echo "export PATH=\"\$PATH:$BN_DIR\"" >> ~/.bashrc
-    export PATH="$PATH:$BN_DIR"
+if ! command -v minop >/dev/null 2>&1; then
+    MINOP_DIR="$(cd "$(dirname "../bn")" && pwd)"
+    echo "export PATH=\"\$PATH:$MINOP_DIR\"" >> ~/.bashrc
+    export PATH="$PATH:$MINOP_DIR"
 fi

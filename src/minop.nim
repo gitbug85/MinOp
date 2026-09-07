@@ -37,7 +37,7 @@ if command == "c":
     quit "File not found!"
 
   let fileInfo = splitFile(path)
-  if not (fileInfo.ext == ".bn"):
+  if not (fileInfo.ext == ".minop"):
     quit "Incorrect file extension!"
 
 
