@@ -46,6 +46,8 @@ proc tokenize*(json: string): seq[Token] =
         result.add(Token(kind: "EXPONENT", value: lexeme))
       of "say":
         result.add(Token(kind: "SAY", value: lexeme))
+      of "echo":
+        result.add(Token(kind: "ECHO", value: lexeme))
       of "mut":
         result.add(Token(kind: "MUTABLE", value: lexeme))
       of "use":
