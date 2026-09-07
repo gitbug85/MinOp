@@ -119,7 +119,7 @@ proc expect_statement(tp: var Transpiler, tokens: var seq[Token]) =
       tokens.delete(0)
       cur = tokens[0]
 
-      var path = findExe("bn")
+      var path = findExe("minop")
       var parent = parentDir(path)
       var standard_library = parent / "runtime" / (cur.value & ".a")
 
