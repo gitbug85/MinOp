@@ -1,7 +1,7 @@
 import std/parseopt
 import tokens
 import std/os
-import lower
+import nim_gen
 import std/strformat
 import osproc
 
@@ -39,7 +39,6 @@ if command == "c":
   let fileInfo = splitFile(path)
   if not (fileInfo.ext == ".minop"):
     quit "Incorrect file extension!"
-
 
   let perlScript = getAppDir() / "lexer.pl"
   let (pl_output, exitCode) = execCmdEx("perl " & quoteShell(perlScript) & " " & quoteShell(path))
