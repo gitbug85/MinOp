@@ -71,7 +71,7 @@ echo greeting
 | Push |<<|
 | Pop |>>|
 | Range |\[#..#\]|
-| Membership |\[@\]|
+| Membership |->|
 | Index |\[#\]|
 | Index Assignment |\[#\] =|
 | Dereference |@|
@@ -79,3 +79,15 @@ echo greeting
 
 Path -> '~/path'
 String -> "string"
+Regex -> \`regex\`
+
+Current instance -> $.
+
+\#\#\
+Multiline comments\
+\#\#
+
+Special types to add:
+arr (Rust array)
+seq (Nim sequence)
+
