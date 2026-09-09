@@ -1,5 +1,7 @@
 import std/strutils
 import std/json
+import lexer
+import std/sequtils
 
 type
   Token* = object
@@ -16,14 +18,9 @@ proc isNumber(s: string): bool =
   except ValueError:
     return false
 
-proc tokenize*(json: string): seq[Token] =
+proc tokenize*(lexemes_objs: var seq[Segment]): seq[Token] =
 
-  let data = parseJson(json)
-
-  var lexemes: seq[string] = @[]
-
-  for item in data:
-    lexemes.add(item["val"].getStr())
+  var lexemes: seq[string] = lexemes_objs.mapIt(it.val)
 
   for lexeme in lexemes:
       if lexeme.len == 0:

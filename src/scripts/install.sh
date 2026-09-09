@@ -1,5 +1,3 @@
-if ! command -v minop >/dev/null 2>&1; then
-    MINOP_DIR="$(cd "$(dirname "../bn")" && pwd)"
-    echo "export PATH=\"\$PATH:$MINOP_DIR\"" >> ~/.bashrc
-    export PATH="$PATH:$MINOP_DIR"
-fi
+#!/usr/bin/env bash
+MINOP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+echo "export PATH=\"$MINOP_DIR:\$PATH\"" >> "$HOME/.bashrc"

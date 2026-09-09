@@ -36,7 +36,6 @@ proc emit_arguments(tp: var Transpiler, tokens: var seq[Token]) =
 
   var parsing = true
   while parsing:
-    echo "Test" & tokens[0].kind
     expect_value(tp, tokens)
     var cur = tokens[0]
 
@@ -69,7 +68,6 @@ proc expect_value(tp: var Transpiler, tokens: var seq[Token]) =
 proc expect_equal(tp: var Transpiler, tokens: var seq[Token]) =
   var cur = tokens[0]
   if cur.kind != "EQUAL":
-    echo tokens
     quit(fmt"Error: Expected EQUAL found {cur.kind}")
   tp.content.add(fmt"= ")
   tokens.delete(0)

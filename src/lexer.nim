@@ -1,5 +1,7 @@
-import re
 import sequtils
+import std/json
+import std/os
+import osproc
 
 type
   Segment* = object
@@ -18,12 +20,12 @@ proc print_segs(segs: seq[Segment]) =
 proc append_to_seg(seg: var Segment, other: var Segment) =
     seg.val &= other.val
 
-proc lex(filename: string): seq[Segment] =
+proc lex*(path: string): seq[Segment] =
 
     # Make fragments based on lines
     var fragments: seq[Segment] = @[]
 
-    for line in lines(filename):
+    for line in lines(path):
         var new_line = line
         let commentIdx = new_line.find('#')
         if commentIdx != -1:
@@ -35,8 +37,12 @@ proc lex(filename: string): seq[Segment] =
         let tabs = count div 4
         let leftover = count mod 4
         
+        if leftover != 0:
+            quit("Error: Invalid indentation")
+        
+        echo tabs
         for _ in 0 .. tabs-1:
-            fragments.add(Segment(val: "  ", col: 0, ln: 0))
+            fragments.add(Segment(val: "\t", col: 0, ln: 0))
         
         fragments.add(Segment(val: new_line, col: 0, ln: 0))
         fragments.add(Segment(val: "\n", col: 0, ln: 0))
@@ -46,15 +52,74 @@ proc lex(filename: string): seq[Segment] =
 
     for fragment in fragments:
         var str_val = fragment.val
-        let regex = re"""([=+\-*/"()\ #])"""
-        var strs = str_val.split(regex)
+        var perlScript = getAppDir() / "lexer.pl"
+        var (pl_output, exitCode) = execCmdEx("perl " & quoteShell(perlScript) & " " & quoteShell(str_val))
+        if exitCode != 0:
+            quit "Error running Perl script. Exit code: " & $exitCode
+        var strs = to(parseJson(pl_output), seq[string])
+        echo strs
         strs = strs.filterIt(it.len > 0)
         for str in strs:
             new_fragments.add(Segment(val: str, col: 0, ln: 0))
 
+    fragments = new_fragments
+
     # Join fragments together for strings, paths and regex
 
-    # Joing fragments together for multi-character operators
+    var status = Status.NotJoining
+    var lexemes: seq[Segment] = @[]
+    var current_lexeme = Segment(val: "", col: 0, ln: 0)
+    var previous_backslash = false
 
-    return new_fragments
+    for fragment in fragments.mitems:
+        var str = fragment.val
+
+        if str == "\\":
+            previous_backslash = true
+            append_to_seg(current_lexeme, fragment)
+        elif str == "\"":
+            if status == Status.JoiningString:
+                if previous_backslash: # Escaped double quote
+                    append_to_seg(current_lexeme, fragment)
+                    previous_backslash = false
+                else: # Closing double quote
+                    status = Status.NotJoining
+                    append_to_seg(current_lexeme, fragment)
+                    lexemes.add(current_lexeme)
+                    current_lexeme = Segment(val: "", col: 0, ln: 0)
+            else: # Opening double quote
+                status = Status.JoiningString
+                append_to_seg(current_lexeme, fragment)
+        elif str == "\'":
+            if status == Status.JoiningPath: # Closing quote
+                status = Status.NotJoining
+                append_to_seg(current_lexeme, fragment)
+                lexemes.add(current_lexeme)
+                current_lexeme = Segment(val: "", col: 0, ln: 0)
+            else: # Opening quote
+                status = Status.JoiningPath
+                append_to_seg(current_lexeme, fragment)
+        elif str == "`":
+            if status == Status.JoiningRegex:
+                if previous_backslash: # Escaped backtick
+                    append_to_seg(current_lexeme, fragment)
+                    previous_backslash = false
+                else: # Closing backtick
+                    status = NotJoining
+                    append_to_seg(current_lexeme, fragment)
+                    lexemes.add(current_lexeme)
+                    current_lexeme = Segment(val: "", col: 0, ln: 0)
+            else: # Opening backtick
+                status = Status.JoiningRegex
+                append_to_seg(current_lexeme, fragment)
+        else:
+            if status == Status.JoiningString or status == Status.JoiningPath or status == Status.JoiningRegex:
+                append_to_seg(current_lexeme, fragment)
+                previous_backslash = false
+            else:
+                lexemes.add(Segment(val: fragment.val, col: fragment.col, ln: fragment.ln))
+
+    # Add code to join fragments together for multi-character operators
+
+    return lexemes
 

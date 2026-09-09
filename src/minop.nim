@@ -4,6 +4,7 @@ import std/os
 import nim_gen
 import std/strformat
 import osproc
+import lexer
 
 var p = initOptParser()
 let appDir = getAppDir()
@@ -39,14 +40,8 @@ if command == "c":
   let fileInfo = splitFile(path)
   if not (fileInfo.ext == ".minop"):
     quit "Incorrect file extension!"
-
-  let perlScript = getAppDir() / "lexer.pl"
-  let (pl_output, exitCode) = execCmdEx("perl " & quoteShell(perlScript) & " " & quoteShell(path))
-  if exitCode != 0:
-    quit "Error running Perl script. Exit code: " & $exitCode
-  var tokens: seq[Token] = tokenize(pl_output)
-  for tok in tokens:
-    echo tok.kind
+  var lexemes: seq[Segment] = lex(path)
+  var tokens: seq[Token] = tokenize(lexemes)
   var content = lower(tokens, "nim")
   echo content
   let parent = parentDir(path)
