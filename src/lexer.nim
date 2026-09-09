@@ -1,3 +1,6 @@
+import re
+import sequtils
+
 type
   Segment* = object
     val*: string
@@ -16,6 +19,8 @@ proc append_to_seg(seg: var Segment, other: var Segment) =
     seg.val &= other.val
 
 proc lex(filename: string): seq[Segment] =
+
+    # Make fragments based on lines
     var fragments: seq[Segment] = @[]
 
     for line in lines(filename):
@@ -32,8 +37,24 @@ proc lex(filename: string): seq[Segment] =
         
         for _ in 0 .. tabs-1:
             fragments.add(Segment(val: "  ", col: 0, ln: 0))
+        
+        fragments.add(Segment(val: new_line, col: 0, ln: 0))
+        fragments.add(Segment(val: "\n", col: 0, ln: 0))
 
-        echo line
+    # Make more fragments using regex
+    var new_fragments: seq[Segment] = @[]
 
-    return fragments
+    for fragment in fragments:
+        var str_val = fragment.val
+        let regex = re"""([=+\-*/"()\ #])"""
+        var strs = str_val.split(regex)
+        strs = strs.filterIt(it.len > 0)
+        for str in strs:
+            new_fragments.add(Segment(val: str, col: 0, ln: 0))
+
+    # Join fragments together for strings, paths and regex
+
+    # Joing fragments together for multi-character operators
+
+    return new_fragments
 
