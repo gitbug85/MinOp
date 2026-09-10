@@ -43,5 +43,18 @@ class If(Node):
         self.condition = condition
         self.body = body
 
-def make_ast():
+class BinaryOperation(Node):
+    def __init__(self, operator: str, l_operand: Node, r_operand: Node):
+        super().__init__("BINARY_OPERATION")
+        self.operator = operator
+        self.l_operand = l_operand
+        self.r_operand = r_operand
+
+class UnaryOperation(Node):
+    def __init__(self, operator: str, operand: Node):
+        super().__init__("UNARY_OPERATION")
+        self.operator = operator
+        self.operand = operand
+
+def gen_ast():
     pass

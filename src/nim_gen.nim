@@ -100,12 +100,12 @@ proc expect_statement(tp: var Transpiler, tokens: var seq[Token]) =
     tokens.delete(0)
     expect_assignment(tp, tokens, true)
   elif cur.kind == "SAY":
-    tp.content.add("c_say(")
+    tp.content.add("rs_say(")
     tokens.delete(0)
     expect_value(tp, tokens)
     tp.content.add(")")
   elif cur.kind == "ECHO":
-    tp.content.add("c_echo(")
+    tp.content.add("rs_echo(")
     tokens.delete(0)
     expect_value(tp, tokens)
     tp.content.add(")")
@@ -162,8 +162,8 @@ proc rs_i32_to_str(value: int32): cstring {.importc.}
 """)
       elif cur.value == "io":
         tp.content.add("""
-proc c_echo(s: cstring) {.cdecl, importc.}
-proc c_say(s: cstring) {.cdecl, importc.}
+proc rs_echo(s: cstring) {.cdecl, importc.}
+proc rs_say(s: cstring) {.cdecl, importc.}
 """)
       tokens.delete(0)
   elif cur.kind == "IMP":

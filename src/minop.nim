@@ -5,6 +5,7 @@ import nim_gen
 import std/strformat
 import osproc
 import lexer
+import std/json
 
 var p = initOptParser()
 let appDir = getAppDir()
@@ -42,6 +43,10 @@ if command == "c":
     quit "Incorrect file extension!"
   var lexemes: seq[Segment] = lex(path)
   var tokens: seq[Token] = tokenize(lexemes)
+  echo $(%tokens)
+  let py_output = execProcess("python3", args = ["lower.py", $(%tokens)], options = {poUsePath})
+  echo "Output from Python:"
+  echo py_output
   var content = lower(tokens, "nim")
   echo content
   let parent = parentDir(path)
