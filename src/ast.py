@@ -1,3 +1,4 @@
+from lower import Token
 
 class Node():
     def __init__(self, name: str):
@@ -56,5 +57,28 @@ class UnaryOperation(Node):
         self.operator = operator
         self.operand = operand
 
-def gen_ast():
-    pass
+class Parser:
+    def __init__(self):
+        self.toks = []
+        self.pos = 0
+
+    def gen_ast(self, toks: list[Token]) -> File:
+        self.toks = toks
+        return self.parse_file()
+
+    def parse_file(self) -> File:
+        pass
+
+    def parse_statement(self) -> Node:
+        pass
+
+    # Helper functions
+
+    def current(self):
+        return self.toks[self.i]
+
+    def expect(self, kind: str):
+        next = self.toks[self.pos+1]
+        if next.kind == kind:
+            return next
+        return -1

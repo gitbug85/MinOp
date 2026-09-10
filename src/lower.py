@@ -1,15 +1,20 @@
-import ast
-import llvm_ir_gen
 import sys
+import json
+import llvm_ir_gen
 
+class Token:
+    def __init__(self, kind: str, value: str):
+        self.kind = kind
+        self.value = value
 
-def lower(json: str):
+def lower(json_string: str):
+    print("Received:", json_string)
 
-    print(json)
+    data = json.loads(json_string)
+
+    toks = [Token(d["kind"], d["value"]) for d in data]
 
     # Generate ast
     file = llvm_ir_gen.gen_ast()
-    pass
 
-
-print(lower(sys.argv[1]))
+    return "TEST"

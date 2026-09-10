@@ -1,11 +1,12 @@
 import std/parseopt
 import tokens
-import std/os
 import nim_gen
 import std/strformat
 import osproc
 import lexer
 import std/json
+import nimpy
+import os
 
 var p = initOptParser()
 let appDir = getAppDir()
@@ -43,10 +44,12 @@ if command == "c":
     quit "Incorrect file extension!"
   var lexemes: seq[Segment] = lex(path)
   var tokens: seq[Token] = tokenize(lexemes)
-  echo $(%tokens)
-  let py_output = execProcess("python3", args = ["lower.py", $(%tokens)], options = {poUsePath})
-  echo "Output from Python:"
-  echo py_output
+  let sys = pyImport("sys")
+  discard sys.path.insert(0, parentDir(currentSourcePath()))
+  let mymodule = pyImport("lower")
+  let message = mymodule.lower($(%tokens)).to(string)
+  echo message
+
   var content = lower(tokens, "nim")
   echo content
   let parent = parentDir(path)

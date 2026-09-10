@@ -4,6 +4,7 @@ htmldocs/
 src/minop
 examples/greeting
 examples/ascii_art_expressions
-examples/bn_calc
+examples/calc
+src/__pycache__
 *.o
 *.a
