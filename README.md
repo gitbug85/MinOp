@@ -1,7 +1,7 @@
 # MinOp
 
 Language I'm making with the goal of simplifying operators.
-Download the latest release. Put the folder where you want it. Then run ```install.sh```.\
+Have Nim installed. Download the latest release. Put the folder where you want it. Then run ```install.sh```.\
 You now should be able to compile .minop files with the command ```minop c ./file.minop```
 
 Example:

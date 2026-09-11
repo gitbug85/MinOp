@@ -67,7 +67,12 @@ class Parser:
         return self.parse_file()
 
     def parse_file(self) -> File:
-        pass
+        parsing = True
+        while parsing:
+            self.parse_statement()
+            next = self.next()
+            if next.kind == "EOF":
+                parsing = False
 
     def parse_statement(self) -> Node:
         pass
@@ -75,7 +80,10 @@ class Parser:
     # Helper functions
 
     def current(self):
-        return self.toks[self.i]
+        return self.toks[self.pos]
+
+    def next(self):
+        return self.toks[self.pos+1]
 
     def expect(self, kind: str):
         next = self.toks[self.pos+1]
