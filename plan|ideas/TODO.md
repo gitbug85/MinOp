@@ -2,7 +2,10 @@
 - X Make reassignment take into account mutability -> Scope!
 - X Add standard library
 - X lexer.pl returns json to bn.nim
-- Implement Python ast and compilation
+- X Make and link seperate path.rs made from io.rs to checking the types of a file (isDir, hasExtOf...)
+- X Remove Perl
+- Implement Python ast and compilation to llvm ir
 - Add Python and Nimpy installation to workflow
 - Change name to Min?
-- Make and link seperate path.rs made from io.rs to checking the types of a file (isDir, isBin, hasExtOf...)
+- Remove Python
+- Use Crystal for coloring text and to replace the Python

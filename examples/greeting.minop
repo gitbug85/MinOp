@@ -2,7 +2,7 @@ use io
 use string
 use cli
 
-name = rs_arg(1)
+name = arg(1)
 mut greeting = rs_str_concat(rs_str_concat("\nHello ", name), "\n")
 
 say greeting

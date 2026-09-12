@@ -2,6 +2,8 @@ import sequtils
 import std/json
 import std/os
 import osproc
+import std/[json, re, os]
+import std/[re, sequtils]
 
 type
   Segment* = object
@@ -13,12 +15,25 @@ type
   Status = enum
     JoiningString, JoiningPath, JoiningRegex, NotJoining
 
+const seps = {'=', '+', '-', '*', '/', '"', '(', ')', '\\', ',', '#', ' '}
+
 proc print_segs(segs: seq[Segment]) =
     for seg in segs:
         echo seg.val
 
 proc append_to_seg(seg: var Segment, other: var Segment) =
     seg.val &= other.val
+
+proc splitKeepSep(s: string): seq[string] =
+  var last = 0
+  for i, c in s:
+    if c in seps:
+      if i > last:
+        result.add(s[last ..< i])
+      result.add($c)
+      last = i + 1
+  if last < s.len:
+    result.add(s[last .. ^1])
 
 proc lex*(path: string): seq[Segment] =
 
@@ -51,16 +66,11 @@ proc lex*(path: string): seq[Segment] =
     var new_fragments: seq[Segment] = @[]
 
     for fragment in fragments:
-        var str_val = fragment.val
-        var perlScript = getAppDir() / "lexer.pl"
-        var (pl_output, exitCode) = execCmdEx("perl " & quoteShell(perlScript) & " " & quoteShell(str_val))
-        if exitCode != 0:
-            quit "Error running Perl script. Exit code: " & $exitCode
-        var strs = to(parseJson(pl_output), seq[string])
-        echo strs
-        strs = strs.filterIt(it.len > 0)
-        for str in strs:
-            new_fragments.add(Segment(val: str, col: 0, ln: 0))
+        let regex = re"""([=+\-\*\/"\(\)\\,# ])""" # ([=\+\-\*\/"\(\)\\,# ])
+        let parts = splitKeepSep(fragment.val).filterIt(it.len > 0)
+        echo parts
+        for part in parts:
+            new_fragments.add(Segment(val: part, col: 0, ln: 0))
 
     fragments = new_fragments
 

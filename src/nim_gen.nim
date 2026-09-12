@@ -100,12 +100,12 @@ proc expect_statement(tp: var Transpiler, tokens: var seq[Token]) =
     tokens.delete(0)
     expect_assignment(tp, tokens, true)
   elif cur.kind == "SAY":
-    tp.content.add("rs_say(")
+    tp.content.add("say(")
     tokens.delete(0)
     expect_value(tp, tokens)
     tp.content.add(")")
   elif cur.kind == "ECHO":
-    tp.content.add("rs_echo(")
+    tp.content.add("echo(")
     tokens.delete(0)
     expect_value(tp, tokens)
     tp.content.add(")")
@@ -137,19 +137,19 @@ proc rs_mult(a: int32, b: int32): int32 {.importc.}
 proc rs_int_div(a: int32, b: int32): int32 {.importc.}
 proc rs_str_to_i32(s: cstring): int32 {.importc.}
 """)
-      elif cur.value == "cli":
+      elif cur.value == "nimPath":
         tp.content.add("""
-proc rs_arg_count(): csize_t {.importc.}
-proc rs_arg(index: csize_t): cstring {.importc.}
-
-proc rs_path_exists(path: cstring): bool {.importc.}
-proc rs_path_is_file(path: cstring): bool {.importc.}
-proc rs_path_is_dir(path: cstring): bool {.importc.}
-
-proc rs_path_join(a: cstring, b: cstring): cstring {.importc.}
-proc rs_path_parent(path: cstring): cstring {.importc.}
-proc rs_path_filename(path: cstring): cstring {.importc.}
-proc rs_path_extension(path: cstring): cstring {.importc.}
+proc jjoinPath(p: cstring, o: cstring): cstring {.importc.}
+proc pparentDir(p: cstring): cstring {.importc.}
+prc bbasename(p: cstring): cstring {.importc.}
+proc sstem(p: cstring): cstring {.importc.}
+proc eext(p: cstring): cstring {.importc.}
+""")
+      elif cur.value == "rustPath":
+        tp.content.add("""
+proc iisFile(path: cstring): bool {.importc.}
+proc iisDir(path: cstring): bool {.importc.}
+proc hhasExtOf(path: cstring, ext: cstring): bool {.importc.}
 """)
       elif cur.value == "string":
         tp.content.add("""
@@ -162,8 +162,10 @@ proc rs_i32_to_str(value: int32): cstring {.importc.}
 """)
       elif cur.value == "io":
         tp.content.add("""
-proc rs_echo(s: cstring) {.cdecl, importc.}
-proc rs_say(s: cstring) {.cdecl, importc.}
+proc echo(s: cstring) {.cdecl, importc.}
+proc say(s: cstring) {.cdecl, importc.}
+proc arg_count(): csize_t {.importc.}
+proc arg(index: csize_t): cstring {.importc.}
 """)
       tokens.delete(0)
   elif cur.kind == "IMP":

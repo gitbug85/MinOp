@@ -1,5 +1,7 @@
 use std::ffi::CStr;
 use std::os::raw::c_char;
+use std::ffi::CString;
+use std::ptr;
 
 // Echo inspired by Nim
 #[no_mangle]

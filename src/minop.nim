@@ -46,10 +46,9 @@ if command == "c":
   var tokens: seq[Token] = tokenize(lexemes)
   let sys = pyImport("sys")
   discard sys.path.insert(0, parentDir(currentSourcePath()))
-  let mymodule = pyImport("lower")
-  let message = mymodule.lower($(%tokens)).to(string)
-  echo message
-
+  # let mymodule = pyImport("lower")
+  # let message = mymodule.lower($(%tokens)).to(string)
+  # echo message
   var content = lower(tokens, "nim")
   echo content
   let parent = parentDir(path)
