@@ -73,9 +73,26 @@ class Parser:
             next = self.next()
             if next.kind == "EOF":
                 parsing = False
+            elif next.kind == "NEWLINE":
+                pos+=2
+
+    def parse_assignment(self) -> Node:
+        pass
 
     def parse_statement(self) -> Node:
-        pass
+        cur = self.current()
+
+        match cur.kind:
+            case "MUTABLE":
+                pass
+            case "FLEX":
+                pass
+            case "MUTFLEX":
+                pass
+            case "IDENTIFIER":
+                pass
+            case _:
+                pass
 
     # Helper functions
 
